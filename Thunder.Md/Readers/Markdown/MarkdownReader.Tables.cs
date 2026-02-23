@@ -58,11 +58,13 @@ public partial class MarkdownReader{
         } else{
             RecallOrErrorPop();
         }
-
+        
         if(rows.Count == 0){
             tableElement = null;
             return false;
         }
+        
+        TryReadReference(out string? referenceId);
 
         int height = rows.Count;
         int minWidth = rows.Min(x => x.Count);
@@ -80,7 +82,7 @@ public partial class MarkdownReader{
             }
         }
         
-        tableElement = new TableElement(table, caption);
+        tableElement = new TableElement(table, caption, referenceId);
         return true;
     }
 }

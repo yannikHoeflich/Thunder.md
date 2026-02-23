@@ -9,8 +9,10 @@ using Thunder.Md.PdfElements.Inline;
 using Thunder.Md.ThunderMath;
 
 public class MathContainer: IPdfElement{
+    private readonly string? _referenceId;
     public string Text{ get; }
-    public MathContainer(string text){
+    public MathContainer(string text, string? referenceId){
+        _referenceId = referenceId;
         Text = text;
     }
     
@@ -18,7 +20,7 @@ public class MathContainer: IPdfElement{
         LatexMathString latexString = new(Text);
         string svg = latexString.ToSvg();
 
-        var indexItem = state.GetNextMathName();
+        var indexItem = state.GetNextMathName(_referenceId);
         TextWrapper nameWrapper = new(config.Project!.NumberingStyle);
         nameWrapper.Add(new PureTextElement(indexItem.Id + " "));
 

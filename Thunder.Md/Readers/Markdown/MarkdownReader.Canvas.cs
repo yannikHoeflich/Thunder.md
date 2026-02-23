@@ -7,12 +7,12 @@ using Thunder.Md.PdfElements.Inline;
 
 public partial class MarkdownReader{
     private bool TryReadCanvas([NotNullWhen(true)] out ICanvasElement? canvasElement){
-        if(!TryReadCanvasContent(out ITextElement? altTextElement, out string? path)){
+        if(!TryReadCanvasContent(out ITextElement? altTextElement, out string? path, out string? label)){
             canvasElement = null;
             return false;
         }
 
-        if(!_extensionLoader.TryGetCanvasElement(path, altTextElement, _config, out canvasElement)){
+        if(!_extensionLoader.TryGetCanvasElement(path, altTextElement, label, _config, out canvasElement)){
             _logger.LogWarning("Cannot generate canvas for file '{file}'. Are you missing to import an extension?",
                                path);
             canvasElement = null;
@@ -23,12 +23,12 @@ public partial class MarkdownReader{
     }
     
     private bool TryReadInlineCanvas([NotNullWhen(true)]out IInlineCanvasElement? inlineCanvasElement){
-        if(!TryReadCanvasContent(out ITextElement? altTextElement, out string? path)){
+        if(!TryReadCanvasContent(out ITextElement? altTextElement, out string? path, out string? label)){
             inlineCanvasElement = null;
             return false;
         }
 
-        if(!_extensionLoader.TryGetInlineCanvas(path, altTextElement, _config, out inlineCanvasElement)){
+        if(!_extensionLoader.TryGetInlineCanvas(path, altTextElement, label, _config, out inlineCanvasElement)){
             _logger.LogWarning("Cannot generate canvas for file '{file}'. Are you missing to import an extension?",
                                path);
             inlineCanvasElement = null;
@@ -40,10 +40,11 @@ public partial class MarkdownReader{
     
 
     private bool TryReadCanvasContent(out ITextElement? altTextElement,
-                                      [NotNullWhen(true)]out string? path){
+                                      [NotNullWhen(true)]out string? path, out string? referenceId){
         if(!_fileReader.TryGetNext(out char c) || c != '['){
             altTextElement = null;
             path = null;
+            referenceId = null;
             return false;
         }
 
@@ -51,6 +52,7 @@ public partial class MarkdownReader{
         if(!_fileReader.TryGetNext(out c)){
             altTextElement = null;
             path = null;
+            referenceId = null;
             return false;
         }
 
@@ -60,6 +62,7 @@ public partial class MarkdownReader{
             if(!TryReadText([new EndChar(']', 1)], EndLineManagement.Error, true, c,
                             out TextWrapper? innerTextWrapper, out _)){
                 path = null;
+                referenceId = null;
                 return false;
             }
 
@@ -68,6 +71,7 @@ public partial class MarkdownReader{
 
             if(!_fileReader.TryGetNext(out c) || c != '('){
                 path = null;
+                referenceId = null;
                 return false;
             }
         }
@@ -75,8 +79,11 @@ public partial class MarkdownReader{
         if(!TryReadTextNotFormatted([new EndChar(isDirect ? ']' : ')', isDirect ? 2 : 1)], EndLineManagement.Error,
                                     true, null,
                                     out path, out _)){
+            referenceId = null;
             return false;
         }
+
+        TryReadReference(out referenceId);
 
         return true;
     }

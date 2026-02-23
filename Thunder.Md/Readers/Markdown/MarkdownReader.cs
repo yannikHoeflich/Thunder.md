@@ -56,11 +56,9 @@ public partial class MarkdownReader{
             }
 
             if(c == '$'){
-                if(_fileReader.TryGetNext(out char tempC)
-                && tempC == '$'
-                && TryReadTextNotFormatted([new('$', 2)], EndLineManagement.Ignore, false, null, out string? mathStr, out _)
+                if(TryReadMathContainer(out MathContainer? mathContainer)
                   ){
-                    yield return new MathContainer(mathStr);
+                    yield return mathContainer;
                     continue;
                 }
 

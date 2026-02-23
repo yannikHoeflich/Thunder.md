@@ -10,13 +10,15 @@ using Thunder.Md.PdfElements.Inline;
 
 public class ThunderImage: ICanvasElement{
     private readonly ITextElement? _altText;
+    private readonly string? _label;
     public string FilePath{ get; }
-    public ThunderImage(string filePath, ITextElement? altText){
+    public ThunderImage(string filePath, ITextElement? altText, string? label){
         _altText = altText;
+        _label = label;
         FilePath = filePath;
     }
     public void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
-        ThunderIndexItem? indexItem = _altText is null ? null: state.GetNextGraphicsName(_altText.Text);
+        ThunderIndexItem? indexItem = _altText is null ? null: state.GetNextGraphicsName(_altText.Text, _label);
         container.Column(column => {
             if(indexItem is not null){
                 column.Item().Section(indexItem.LabelId);
@@ -48,10 +50,10 @@ public class ThunderImage: ICanvasElement{
         });
     }
 
-    public static bool Create(ExtensionArgs args, string url, ITextElement? altText, [NotNullWhen(true)] out ICanvasElement? canvasElement){
+    public static bool Create(ExtensionArgs args, string url, ITextElement? altText, string? label, [NotNullWhen(true)] out ICanvasElement? canvasElement){
         string fullPath = Path.Combine(ThunderPaths.Source, url);
 
-        canvasElement = new ThunderImage(fullPath, altText);
+        canvasElement = new ThunderImage(fullPath, altText, label);
         return true;
     }
 }

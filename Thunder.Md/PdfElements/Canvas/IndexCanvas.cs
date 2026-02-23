@@ -36,7 +36,7 @@ public abstract class IndexCanvas: ICanvasElement{
     protected abstract IReadOnlyCollection<ThunderIndexItem> GetItems(ThunderConfig config, ThunderBuildState state,
                                                                       IContainer container);
 
-    public static bool Create(ExtensionArgs args, string url, ITextElement? altText,
+    public static bool Create(ExtensionArgs args, string url, ITextElement? altText, string? __label,
                               [NotNullWhen(true)] out ICanvasElement? canvasElement){
         var simplified = Path.GetFileNameWithoutExtension(url).Trim().ToLower();
         switch(simplified){

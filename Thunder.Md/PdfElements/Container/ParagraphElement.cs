@@ -14,22 +14,24 @@ public class ParagraphElement: IPdfElement{
     }
 
     public void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
-        container.SemanticParagraph().Text(t => {
-            switch(config.Project!.TextAlignment){
-                case Alignment.Left:
-                    t.AlignLeft();
+        container.Lazy(container => {
+            container.SemanticParagraph().Text(t => {
+                switch(config.Project!.TextAlignment){
+                    case Alignment.Left:
+                        t.AlignLeft();
                     break;
-                case Alignment.Right:
-                    t.AlignRight();
+                    case Alignment.Right:
+                        t.AlignRight();
                     break;
-                case Alignment.Middle:
-                    t.AlignCenter();
+                    case Alignment.Middle:
+                        t.AlignCenter();
                     break;
-                case Alignment.Justify:
-                    t.Justify();
+                    case Alignment.Justify:
+                        t.Justify();
                     break;
-            }
-            _textElement.Draw(t, new FontStyle(), state, config);
+                }
+                _textElement.Draw(t, new FontStyle(), state, config);
+            });
         });
     }
 }

@@ -13,16 +13,18 @@ public record struct TableCell(ITextElement Text, bool IsHeader);
 public class TableElement: IPdfElement{
     private TableCell[,] _table;
     private readonly ITextElement? _caption;
+    private readonly string? _referenceId;
 
-    public TableElement(TableCell[,] table, ITextElement? caption){
+    public TableElement(TableCell[,] table, ITextElement? caption, string? referenceId){
         _table = table;
         _caption = caption;
+        _referenceId = referenceId;
     }
 
     public void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
         ThunderIndexItem? index = null;
         if(_caption is not null){
-            index = state.GetNextTableName(_caption.Text);
+            index = state.GetNextTableName(_caption.Text, _referenceId);
         }
         container.Column(container => {
             IContainer tableItem = container.Item();

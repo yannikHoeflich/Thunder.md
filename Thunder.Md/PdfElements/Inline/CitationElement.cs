@@ -16,8 +16,9 @@ public class CitationElement: ITextElement{
     public string Text => Label;
     
     public void Draw(TextDescriptor text, FontStyle fontStyle, ThunderBuildState state, ThunderConfig config){
-        if(!state.TryGetCitation(Label, out Citation? citation)){
+        if(!state.TryGetReference(Label, out ReferenceItem? reference)){
             text.Span($"[No reference for '{Label}']").Style(fontStyle.Combine(new FontStyle(Bold: true, Italic: true)).ToPdfStyle(config));
+            //TODO: Log warning
             return;
         }
         
@@ -29,6 +30,6 @@ public class CitationElement: ITextElement{
                     _                            => style
                 };
         
-        text.SectionLink(citation.ReferenceString, citation.Label).Style(style);
+        text.SectionLink(reference.ReferenceText, reference.Link).Style(style);
     }
 }

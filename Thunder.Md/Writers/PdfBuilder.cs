@@ -4,11 +4,13 @@ using Microsoft.Extensions.Logging;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
+using Thunder.Md.Building;
 using Thunder.Md.CodeExtensions;
 using Thunder.Md.Extensions;
 using Thunder.Md.Extensions.Cite;
 using Thunder.Md.Extensions.Config;
 using Thunder.Md.Extensions.PdfElements;
+using Thunder.Md.InternalExtensions;
 using Thunder.Md.PdfElements;
 using Thunder.Md.Readers;
 
@@ -30,7 +32,14 @@ public class PdfBuilder{
         var setting = new DocumentSettings(){
                                                 PDFUA_Conformance = PDFUA_Conformance.PDFUA_1
                                             };
+                                var state = new ThunderBuildState(_config, publications);
         
+                                foreach(IPdfElement element in elements){
+                                    element.Prebuild(_config, state);
+                                }
+
+                                state.EndOfPrebuild();
+                                
         Document.Create(container => {
                     container.Page(page => {
                         page.Size(_config.Project!.GetPdfSize());
@@ -44,7 +53,6 @@ public class PdfBuilder{
                             .PaddingVertical(1, Unit.Centimetre)
                             .Column(columnsHandler => {
                                 columnsHandler.Spacing(20);
-                                var state = new ThunderBuildState(_config, publications);
                                 foreach(IPdfElement element in elements){
                                     element.Draw(_config, state, columnsHandler.Item());
                                 }

@@ -4,24 +4,29 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
+using Thunder.Md.Building;
 using Thunder.Md.Extensions;
 using Thunder.Md.Extensions.Config;
 using Thunder.Md.Extensions.PdfElements;
 using Thunder.Md.PdfElements.Inline;
+using Thunder.Md.CodeExtensions;
+using Thunder.Md.InternalExtensions;
 
 public class ThunderImage: ICanvasElement{
-    private readonly ITextElement? _altText;
+    private readonly ITextElement? _caption;
     private readonly string? _label;
     public string FilePath{ get; }
     private readonly float _width;
-    public ThunderImage(string filePath, ITextElement? altText, string? label, float width){
-        _altText = altText;
+    
+    private ThunderIndexItem? _indexItem;
+    public ThunderImage(string filePath, ITextElement? caption, string? label, float width){
+        _caption = caption;
         _label = label;
         _width = width;
         FilePath = filePath;
     }
-    public void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
-        ThunderIndexItem? indexItem = _altText is null ? null: state.GetNextGraphicsName(_altText.Text, _label);
+    
+    public void Draw(ThunderConfig config, IThunderBuildState state, IContainer container){
         container.Column(column => {
             float availableWidth = (config.Project!.PaperWidth - 2 * config.Project!.PageMargin);
             float availableHeight = (config.Project!.PaperHeight - 2 * config.Project!.PageMargin);
@@ -29,11 +34,11 @@ public class ThunderImage: ICanvasElement{
             float imageWidth = availableWidth * _width;
             float imageHeight = availableHeight * 1;
             
-            if(indexItem is not null){
-                column.Item().Section(indexItem.LabelId);
+            if(_indexItem is not null){
+                column.Item().Section(_indexItem.SectionId);
             }
-            if(config.Project!.GraphicsNumbering.Alignment ==  Alignment.Top){
-                AddAltText(config, column, indexItem, state);
+            if(config.Project!.GraphicsNumbering is not null && config.Project!.GraphicsNumbering!.Used && config.Project!.GraphicsNumbering?.Alignment ==  Alignment.Top){
+                AddAltText(config, column, _indexItem, state);
                 column.Item().Height(config.Project!.FontSize * 0.5f);
             }
 
@@ -41,25 +46,25 @@ public class ThunderImage: ICanvasElement{
                   .MaxHeight(imageHeight, Unit.Millimetre)
                   .Width(imageWidth, Unit.Millimetre)
                   .AlignCenter().AlignBottom()
-                  .SemanticFigure(_altText?.Text ?? "Image").Image(Image.FromFile(FilePath))
+                  .SemanticFigure(_caption?.Text ?? "Image").Image(Image.FromFile(FilePath))
                   .FitArea();
-            if(config.Project!.GraphicsNumbering.Alignment ==  Alignment.Bottom){
+            if(config.Project!.GraphicsNumbering is not null && config.Project!.GraphicsNumbering?.Alignment ==  Alignment.Bottom){
                 column.Item().Height(config.Project!.FontSize * 0.5f);
-                AddAltText(config, column, indexItem, state);
+                AddAltText(config, column, _indexItem, state);
             }
         });
     }
 
     private void AddAltText(ThunderConfig config, ColumnDescriptor column, ThunderIndexItem? indexItem,
-                            ThunderBuildState state){
-        if(indexItem is null || _altText is null){
+                            IThunderBuildState state){
+        if(indexItem is null || _caption is null){
             return;
         }
         TextWrapper nameWrapper = new(config.Project!.NumberingStyle);
-        nameWrapper.Add(new PureTextElement(indexItem.Id + " "));
+        nameWrapper.Add(new PureTextElement(indexItem.ReferenceText + " "));
         TextWrapper textWrapper = new(new FontStyle());
         textWrapper.Add(nameWrapper);
-        textWrapper.Add(_altText);
+        textWrapper.Add(_caption);
         column.Item().SemanticCaption().AlignCenter().Text(text => {
             textWrapper.Draw(text, new FontStyle(), state, config);
         });
@@ -78,5 +83,13 @@ public class ThunderImage: ICanvasElement{
         
         canvasElement = new ThunderImage(fullPath, altText, label, width);
         return true;
+    }
+    
+    
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){
+        if(_caption is null){
+            return;
+        }
+        _indexItem = state.GetNextItemName(ThunderBuildState.FigureGroup, _caption.Text, _label);
     }
 }

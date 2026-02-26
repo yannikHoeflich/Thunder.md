@@ -9,20 +9,28 @@ using Thunder.Md.Extensions.PdfElements;
 
 public class ListElement: IPdfElement{
     public bool Ordered{ get; }
-    public NumberingStyle NumberingStyle { get; }
+    public NumberingStyle NumberingStyle{ get; }
     private List<ListItem> _items = [];
-    
+
     public ListElement(bool ordered, NumberingStyle numberingStyle, IReadOnlyList<ListItem> list){
         Ordered = ordered;
         NumberingStyle = numberingStyle;
         _items.AddRange(list);
     }
-    
-    public void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
+
+    public void Draw(ThunderConfig config, IThunderBuildState state, IContainer container){
         Draw(config, state, container, 0, this);
     }
-    
-    private static void Draw(ThunderConfig config, ThunderBuildState state, IContainer container, int padding, ListElement listElement){
+
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){
+        foreach(ListItem item in _items){
+            item.List?.Prebuild(config, state);
+            item.Text?.Prebuild(config, state);
+        }
+    }
+
+    private static void Draw(ThunderConfig config, IThunderBuildState state, IContainer container, int padding,
+                             ListElement listElement){
         container.SemanticList().PaddingLeft(padding, Unit.Millimetre).Column(column => {
             int counter = 0;
             foreach(ListItem item in listElement._items){
@@ -54,10 +62,10 @@ public class ListElement: IPdfElement{
 }
 
 public class ListItem{
-    public ITextElement? Text { get; }
-    public ListElement? List { get; }
-    
-    public bool IsList =>  List is not null;
+    public ITextElement? Text{ get; }
+    public ListElement? List{ get; }
+
+    public bool IsList => List is not null;
 
     public ListItem(ITextElement text){
         Text = text;

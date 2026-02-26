@@ -1,5 +1,6 @@
 namespace Thunder.Md.PdfElements.Canvas;
 
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
@@ -11,27 +12,30 @@ using Thunder.Md.Readers;
 using Thunder.Md.Readers.Markdown;
 
 public class MarkdownCanvas: ICanvasElement{
-    public string FilePath{ get; }
+    private readonly string _filePath;
+    private List<IPdfElement>? _elements;
     public MarkdownCanvas(string filePath){
-        FilePath = filePath;
+        _filePath = filePath;
     }
-    public void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
-        MarkdownReader markdownReader = new(FilePath, config, Program.ExtensionLoader!, Program.CreateLogger<MarkdownReader>());
-
-        List<IPdfElement> elements = markdownReader.Read().ToList();
-        
-        ThunderBuildState localState = state.Clone();
-        foreach(IPdfElement element in elements){
-            MockContainer mockContainer = new();
-            element.Draw(config, state, mockContainer);
+    public void Draw(ThunderConfig config, IThunderBuildState state, IContainer container){
+        if(_elements is null){
+            throw new UnreachableException();
         }
         
         container.Column(columnsHandler => {
             columnsHandler.Spacing(20);
-            foreach(IPdfElement element in elements){
-                element.Draw(config, localState, columnsHandler.Item());
+            foreach(IPdfElement element in _elements){
+                element.Draw(config, state, columnsHandler.Item());
             }
         });
+    }
+
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){
+        MarkdownReader markdownReader = new(_filePath, config, Program.ExtensionLoader!, Program.CreateLogger<MarkdownReader>());
+        _elements = markdownReader.Read().ToList();
+        foreach(IPdfElement element in _elements){
+            element.Prebuild(config, state);
+        }
     }
 
     public static bool Create(ExtensionArgs args, string url, ITextElement? __altText, string? __label, Dictionary<string, string?> __parameters, [NotNullWhen(true)] out ICanvasElement? canvasElement){

@@ -1,5 +1,8 @@
 ﻿namespace Thunder.Md.Extensions.Config;
 
+using System.Collections.Immutable;
+using Thunder.Md.Extensions.PdfElements;
+
 public class NumberingConfig{
     public Alignment Alignment{ get; set; } = Alignment.Bottom;
     public string Prefix{ get; set; } = "";
@@ -57,22 +60,6 @@ public class ThunderProjectConfig{
     public Dictionary<string, object> ExtensionSettings{ get; } = new();
     public List<string> ImportedExtensions{ get; } = [];
 
-    public NumberingConfig GraphicsNumbering{ get; } = new(){
-                                                                Prefix = "Abb.",
-                                                                SectionLayer = 1,
-                                                            };
-
-    public NumberingConfig MathNumbering{ get; } = new(){
-                                                            Alignment = Alignment.Right,
-                                                            Prefix = "Gl.",
-                                                            SectionLayer = 1,
-                                                        };
-
-    public NumberingConfig TableNumbering{ get; } = new(){
-                                                             Prefix = "Tab.",
-                                                             SectionLayer = 1,
-                                                         };
-
     public FontStyle NumberingStyle{ get; set; } = new(Italic: true);
 
     public int MaxLayerForOwnPage{ get; set; } = 1;
@@ -80,6 +67,13 @@ public class ThunderProjectConfig{
     public List<string> ReferencePaths { get; } = new();
     
     public CitationConfig Citation{ get; set; }  = new();
+
+    public ImmutableDictionary<ReferenceGroup, NumberingConfig> Numberings{ get; set; }
+        = new Dictionary<ReferenceGroup, NumberingConfig>(){
+              { new ReferenceGroup("FIGURE"), new NumberingConfig(){SectionLayer = 1, Prefix = "Fig.", Alignment = Alignment.Bottom} },
+              { new ReferenceGroup("TABLE"), new NumberingConfig(){SectionLayer = 1, Prefix = "Tab.", Alignment = Alignment.Bottom} },
+              { new ReferenceGroup("MATH"), new NumberingConfig(){SectionLayer = 1, Prefix = "Eq.", Alignment = Alignment.Right} },
+          }.ToImmutableDictionary();
 
     public ThunderColor? ContrastColorTo(ThunderColor color){
         float value = byte.Max(color.R, byte.Max(color.G, color.B)) / 255f;

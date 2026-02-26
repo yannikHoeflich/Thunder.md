@@ -11,9 +11,11 @@ public class MathInline:ITextElement{
     public MathInline(string text){
         Text = text;
     }
-    public void Draw(TextDescriptor text, FontStyle fontStyle, ThunderBuildState state, ThunderConfig config){
+    public void Draw(TextDescriptor text, FontStyle fontStyle, IThunderBuildState state, ThunderConfig config){
         var latexString = new LatexMathString(Text);
         var svg = latexString.ToSvg();
         text.Element().PaddingBottom(config.Project!.FontSize * -0.2f).Height(config.Project!.FontSize * (fontStyle.SizeMultiplier??1) * 1.1f).Svg(svg);
     }
+
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){ }
 }

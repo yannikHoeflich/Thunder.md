@@ -4,6 +4,11 @@
 
 ## Planed Features
 - different unordered table icons
+- Line Breaks '\' at end of line
+- Blockquotes
+- Insert texts in lists
+- links
+- comments that are ignored in building
 - citation
   - templating
     - template

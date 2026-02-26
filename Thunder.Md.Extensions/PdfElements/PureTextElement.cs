@@ -11,7 +11,7 @@ public class PureTextElement: ITextElement{
 
     public string Text{ get; }
 
-    public void Draw(TextDescriptor text, FontStyle fontStyle, ThunderBuildState state, ThunderConfig config){
+    public void Draw(TextDescriptor text, FontStyle fontStyle, IThunderBuildState state, ThunderConfig config){
         if(string.IsNullOrEmpty(Text)){
             return;
         }
@@ -19,4 +19,6 @@ public class PureTextElement: ITextElement{
         TextStyle textStyle = fontStyle.ToPdfStyle(config);
         text.Span(Text).Style(textStyle);
     }
+
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){ }
 }

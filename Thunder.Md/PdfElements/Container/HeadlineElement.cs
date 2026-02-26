@@ -21,7 +21,9 @@ public class HeadlineElement: IPdfElement{
     public string Text => TextElement.Text;
     public int Layer{ get; }
     public bool Indexed{ get; }
-    public void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
+
+    private ThunderIndexItem? _indexItem;
+    public void Draw(ThunderConfig config, IThunderBuildState state, IContainer container){
         if(config.Project!.HeadlineSizes.Length == 0){
             config.Project!.HeadlineSizes = [2];
             _logger.LogWarning("Invalid headline sizes, using (text size)*2 as default");
@@ -48,10 +50,9 @@ public class HeadlineElement: IPdfElement{
         
         FontStyle fontStyle = new(SizeMultiplier: size, Bold: bold);
         TextWrapper textWrapper = new(fontStyle);
-        if(Indexed){
-            var indexItem = state.NextSectionId(Layer, Text);
-            textWrapper.Add(new PureTextElement(indexItem.Id + " "));
-            container = container.Section(indexItem.LabelId);
+        if(Indexed && _indexItem is not null){
+            textWrapper.Add(new PureTextElement(_indexItem.ReferenceText + " "));
+            container = container.Section(_indexItem.SectionId);
         }
         textWrapper.Add(TextElement);
         /*if(Layer <= config.Project!.MaxLayerForOwnPage){
@@ -62,5 +63,12 @@ public class HeadlineElement: IPdfElement{
         container.Text(t => {
             textWrapper.Draw(t, fontStyle, state, config);
         });
+    }
+
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){
+        if(Indexed){
+            _indexItem = state.NextSectionId(Layer, Text);
+        }
+        TextElement.Prebuild(config, state);
     }
 }

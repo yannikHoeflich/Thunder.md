@@ -8,6 +8,8 @@ using Thunder.Md.Extensions.Config;
 using Thunder.Md.Extensions.PdfElements;
 
 public class CitationElement: ITextElement{
+    private ThunderIndexItem? _reference;
+    
     public CitationElement(string label){
         Label = label;
     }
@@ -15,8 +17,9 @@ public class CitationElement: ITextElement{
     public string Label{ get; }
     public string Text => Label;
     
-    public void Draw(TextDescriptor text, FontStyle fontStyle, ThunderBuildState state, ThunderConfig config){
-        if(!state.TryGetReference(Label, out ReferenceItem? reference)){
+    public void Draw(TextDescriptor text, FontStyle fontStyle, IThunderBuildState state, ThunderConfig config){
+        ThunderIndexItem? reference =  _reference;
+        if(reference is not null || !state.TryGetReference(Label, out reference)){
             text.Span($"[No reference for '{Label}']").Style(fontStyle.Combine(new FontStyle(Bold: true, Italic: true)).ToPdfStyle(config));
             //TODO: Log warning
             return;
@@ -30,6 +33,10 @@ public class CitationElement: ITextElement{
                     _                            => style
                 };
         
-        text.SectionLink(reference.ReferenceText, reference.Link).Style(style);
+        text.SectionLink(reference.ReferenceText, reference.SectionId).Style(style);
+    }
+
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){
+        state.RegisterCitation(Label);
     }
 }

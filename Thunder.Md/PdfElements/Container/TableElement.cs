@@ -3,15 +3,18 @@ namespace Thunder.Md.PdfElements.Container;
 using System.Diagnostics;
 using QuestPDF.Fluent;
 using QuestPDF.Infrastructure;
+using Thunder.Md.Building;
 using Thunder.Md.CodeExtensions;
 using Thunder.Md.Extensions.Config;
 using Thunder.Md.Extensions.PdfElements;
+using Thunder.Md.InternalExtensions;
 using Thunder.Md.PdfElements.Inline;
 
 public record struct TableCell(ITextElement Text, bool IsHeader);
 
 public class TableElement: IPdfElement{
     private TableCell[,] _table;
+    private ThunderIndexItem? _indexItem;
     private readonly ITextElement? _caption;
     private readonly string? _referenceId;
 
@@ -21,15 +24,11 @@ public class TableElement: IPdfElement{
         _referenceId = referenceId;
     }
 
-    public void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
-        ThunderIndexItem? index = null;
-        if(_caption is not null){
-            index = state.GetNextTableName(_caption.Text, _referenceId);
-        }
+    public void Draw(ThunderConfig config, IThunderBuildState state, IContainer container){
         container.Column(container => {
             IContainer tableItem = container.Item();
-            if(index is not null){
-                tableItem = tableItem.Section(index.LabelId);
+            if(_indexItem is not null){
+                tableItem = tableItem.Section(_indexItem.SectionId);
             }
             tableItem.SemanticTable().Table(table => {
                 table.ColumnsDefinition(columns => {
@@ -64,14 +63,15 @@ public class TableElement: IPdfElement{
             });
 
             if(_caption is not null){
-                if(index is null){
+                //TODO: match position to config
+                if(_indexItem is null){
                     throw new UnreachableException();
                 }
 
                 TextWrapper wrapper = new TextWrapper(new FontStyle());
 
                 TextWrapper indexElement = new TextWrapper(config.Project!.NumberingStyle);
-                indexElement.Add(new PureTextElement(index.Id + " "));
+                indexElement.Add(new PureTextElement(_indexItem.ReferenceText + " "));
                 
                 wrapper.Add(indexElement);
                 wrapper.Add(_caption);
@@ -82,5 +82,12 @@ public class TableElement: IPdfElement{
                 });
             }
         });
+    }
+
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){
+        if(_caption is null){
+            return;
+        }
+        _indexItem = state.GetNextItemName(ThunderBuildState.TableGroup, _caption.Text, _referenceId);
     }
 }

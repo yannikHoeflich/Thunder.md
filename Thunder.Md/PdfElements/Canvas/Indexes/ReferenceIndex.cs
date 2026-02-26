@@ -23,25 +23,25 @@ public class ReferenceIndex: IndexCanvas{
         }
     }
 
-    protected override IReadOnlyCollection<ThunderIndexItem> GetItems(ThunderConfig config, ThunderBuildState state,
+    protected override IReadOnlyCollection<ThunderIndexItem> GetItems(ThunderConfig config, IThunderBuildState state,
                                                                       IContainer container){
         throw new UnreachableException();
     }
 
-    public override void Draw(ThunderConfig config, ThunderBuildState state, IContainer container){
+    public override void Draw(ThunderConfig config, IThunderBuildState state, IContainer container){
         container.Lazy(container => {
             container.Table(table => {
                 var publications = state.Publications.Where(Filter).ToArray();
                 table.ColumnsDefinition(columns => {
-                    int maxIdLength = publications.Max(x => x.Label.Length);
+                    int maxIdLength = publications.Max(x => x.IndexItem.ReferenceText.Length);
                     float idWidth = maxIdLength * config.Project!.FontSize;
                     
                     columns.ConstantColumn(idWidth);
                     columns.RelativeColumn();
                 });
                 
-                foreach((ThunderPublication publication, string id) in publications){
-                    table.Cell().Section(publication.Label).PaddingVertical(config.Project!.FontSize * 0.2f).Text(id);
+                foreach((ThunderPublication publication, ThunderIndexItem indexItem) in publications){
+                    table.Cell().Section(publication.Label).PaddingVertical(config.Project!.FontSize * 0.2f).Text(indexItem.ReferenceText);
                     table.Cell().PaddingVertical(config.Project!.FontSize * 0.2f).Text(publication.ToString());
                 }
                 
@@ -50,7 +50,7 @@ public class ReferenceIndex: IndexCanvas{
         });
     }
 
-    private bool Filter((ThunderPublication Publication, string Label) arg){
+    private bool Filter((ThunderPublication Publication, ThunderIndexItem Index) arg){
         if(_filter.Count == 0){
             return true;
         }

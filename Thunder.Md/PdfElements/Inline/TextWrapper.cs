@@ -14,10 +14,16 @@ public class TextWrapper: ITextElement{
         FontStyle = fontStyle;
     }
     
-    public void Draw(TextDescriptor text, FontStyle fontStyle, ThunderBuildState state, ThunderConfig config){
+    public void Draw(TextDescriptor text, FontStyle fontStyle, IThunderBuildState state, ThunderConfig config){
         fontStyle = fontStyle.Combine(FontStyle);
         foreach(var textElement in _textElements){
             textElement.Draw(text, fontStyle, state, config);
+        }
+    }
+
+    public void Prebuild(ThunderConfig config, IThunderBuildState state){
+        foreach(var textElement in _textElements){
+            textElement.Prebuild(config, state);
         }
     }
 

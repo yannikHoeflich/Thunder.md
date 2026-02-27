@@ -29,7 +29,6 @@ public class ReferenceIndex: IndexCanvas{
     }
 
     public override void Draw(ThunderConfig config, IThunderBuildState state, IContainer container){
-        container.Lazy(container => {
             container.Table(table => {
                 var publications = state.Publications.Where(Filter).ToArray();
                 table.ColumnsDefinition(columns => {
@@ -41,13 +40,12 @@ public class ReferenceIndex: IndexCanvas{
                 });
                 
                 foreach((ThunderPublication publication, ThunderIndexItem indexItem) in publications){
-                    table.Cell().Section(publication.Label).PaddingVertical(config.Project!.FontSize * 0.2f).Text(indexItem.ReferenceText);
+                    table.Cell().Section(indexItem.SectionId).PaddingVertical(config.Project!.FontSize * 0.2f).Text(indexItem.ReferenceText);
                     table.Cell().PaddingVertical(config.Project!.FontSize * 0.2f).Text(publication.ToString());
                 }
                 
             });
-            
-        });
+        
     }
 
     private bool Filter((ThunderPublication Publication, ThunderIndexItem Index) arg){

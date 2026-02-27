@@ -4,6 +4,8 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+using QuestPDF.Fluent;
+using Thunder.Md.Extensions;
 using Thunder.Md.Extensions.Cite;
 using Thunder.Md.Extensions.Config;
 using Thunder.Md.Extensions.PdfElements;
@@ -14,6 +16,7 @@ public class ThunderBuildState: IThunderBuildState{
     public static readonly ReferenceGroup TableGroup = new ReferenceGroup("TABLE");
     public static readonly ReferenceGroup MathGroup = new ReferenceGroup("MATH");
     public static readonly ReferenceGroup CitationGroup = new ReferenceGroup("CITATION");
+    public static readonly ReferenceGroup NumberingGroup = new ReferenceGroup("PAGE_NUMBERING");
 
     private bool _isInPrebuild = true;
     
@@ -40,7 +43,7 @@ public class ThunderBuildState: IThunderBuildState{
     }
 
 
-    public ThunderIndexItem GetNextItemName(ReferenceGroup group, string name, string? label){
+    public ThunderIndexItem GetNextIndexItem(ReferenceGroup group, string name, string? label){
         if(!_isInPrebuild){
             //TODO: Log error
             return null!;
@@ -189,6 +192,31 @@ public class ThunderBuildState: IThunderBuildState{
                                                                        _elementReferences
                                                                            = _elementReferences.ToList()
                                                                    };
+    }
+
+    private record PageAnchor(string SectionId, int DeltaPage, NumberingStyle Style);
+
+    private List<PageAnchor> _pageAnchors = [];
+    public void AddPageNumberAnchor(string sectionId, int deltaPage, NumberingStyle style){
+        _pageAnchors.Add(new PageAnchor(sectionId, deltaPage, style));
+    }
+
+    public string GetPageNumber(int pageNumber, Func<string, int> anchorPageReader){
+        NumberingStyle style = NumberingStyle.Numeric;
+        int delta = 0;
+        int i = 0;
+        while(i < _pageAnchors.Count){
+            PageAnchor anchor = _pageAnchors[i];
+            int localPage = anchorPageReader(anchor.SectionId);
+            if(localPage > pageNumber){
+                break;
+            }
+            delta = localPage - anchor.DeltaPage;
+            style = anchor.Style;
+            i++;
+        }
+        
+        return NumberEncoder.Encode(pageNumber - delta, style);
     }
 
     public void EndOfPrebuild(){

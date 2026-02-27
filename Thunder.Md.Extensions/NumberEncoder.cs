@@ -10,6 +10,10 @@ public static class NumberEncoder{
     private const string AlphabeticLowercase = "abcdefghijklmnopqrstuvwxyz";
 
     public static string Encode(int number, NumberingStyle style){
+        if(style == NumberingStyle.NotShow){
+            return "";
+        }
+        
         if(number == 0){
             return string.Empty;
         }

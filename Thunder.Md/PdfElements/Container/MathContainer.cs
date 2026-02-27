@@ -49,6 +49,6 @@ public class MathContainer: IPdfElement{
     }
 
     public void Prebuild(ThunderConfig config, IThunderBuildState state){
-        _indexItem = state.GetNextItemName(ThunderBuildState.MathGroup, "", _referenceId);
+        _indexItem = state.GetNextIndexItem(ThunderBuildState.MathGroup, "", _referenceId);
     }
 }

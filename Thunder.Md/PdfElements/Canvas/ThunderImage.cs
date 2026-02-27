@@ -90,6 +90,6 @@ public class ThunderImage: ICanvasElement{
         if(_caption is null){
             return;
         }
-        _indexItem = state.GetNextItemName(ThunderBuildState.FigureGroup, _caption.Text, _label);
+        _indexItem = state.GetNextIndexItem(ThunderBuildState.FigureGroup, _caption.Text, _label);
     }
 }

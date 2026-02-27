@@ -88,6 +88,6 @@ public class TableElement: IPdfElement{
         if(_caption is null){
             return;
         }
-        _indexItem = state.GetNextItemName(ThunderBuildState.TableGroup, _caption.Text, _referenceId);
+        _indexItem = state.GetNextIndexItem(ThunderBuildState.TableGroup, _caption.Text, _referenceId);
     }
 }

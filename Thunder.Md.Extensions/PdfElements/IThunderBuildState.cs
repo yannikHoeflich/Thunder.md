@@ -29,7 +29,7 @@ public interface IThunderBuildState{
     public ThunderIndexItem? RegisterCitation(string referenceId);
     public IReadOnlyList<ThunderIndexItem> SectionItems { get; }
     
-    public ThunderIndexItem GetNextItemName(ReferenceGroup group, string name, string? label);
+    public ThunderIndexItem GetNextIndexItem(ReferenceGroup group, string name, string? label);
     
     public IReadOnlyList<ThunderIndexItem> OfGroup(ReferenceGroup group);
     
@@ -40,4 +40,6 @@ public interface IThunderBuildState{
     
     public IThunderBuildState Clone();
 
+    void AddPageNumberAnchor(string sectionId, int deltaPage, NumberingStyle style);
+    string GetPageNumber(int pageNumber, Func<string, int> anchorPageReader);
 }

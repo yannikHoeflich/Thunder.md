@@ -12,6 +12,7 @@ using Thunder.Md.Extensions.Config;
 using Thunder.Md.Extensions.PdfElements;
 using Thunder.Md.InternalExtensions;
 using Thunder.Md.PdfElements;
+using Thunder.Md.PdfElements.Dynamics;
 using Thunder.Md.Readers;
 
 public class PdfBuilder{
@@ -29,9 +30,9 @@ public class PdfBuilder{
         BibtexReader bibtexReader = new(_config);
         IReadOnlyCollection<ThunderPublication> publications = bibtexReader.Read();
 
-        var setting = new DocumentSettings(){
-                                                PDFUA_Conformance = PDFUA_Conformance.PDFUA_1
-                                            };
+        DocumentSettings setting = new(){
+                                            PDFUA_Conformance = PDFUA_Conformance.PDFUA_1
+                                        };
                                 var state = new ThunderBuildState(_config, publications);
         
                                 foreach(IPdfElement element in elements){
@@ -49,6 +50,10 @@ public class PdfBuilder{
                                                     .FontColor(_config.Project!.TextColor.ToPdfColor())
                                                     .FontFamily(_config.Project!.FontFamily));
 
+                        page.Header().Row(row => {
+                            row.AutoItem().Dynamic(new PageNumberContainer(state));
+                        });
+                        
                         page.Content()
                             .PaddingVertical(1, Unit.Centimetre)
                             .Column(columnsHandler => {

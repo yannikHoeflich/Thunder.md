@@ -10,6 +10,7 @@ using Thunder.Md.CodeExtensions;
 using Thunder.Md.Extensions;
 using Thunder.Md.Extensions.Config;
 using Thunder.Md.Extensions.PdfElements;
+using Thunder.Md.InternalExtensions.CodeFormatters;
 
 public class ExtensionLoader{
    private readonly ILogger _logger;
@@ -29,6 +30,8 @@ public class ExtensionLoader{
     
     private readonly Dictionary<CanvasCreator, ThunderExtension> _canvasExtensionLookup = new();
     private readonly Dictionary<InlineCanvasCreator, ThunderExtension> _inlineCanvasExtensionLookup = new();
+
+    private readonly List<ICodeFormatter> _codeFormatters = [];
 
     public ExtensionLoader(ILogger logger, string strPath){
         _logger = logger;
@@ -152,6 +155,15 @@ public class ExtensionLoader{
                 _canvasCreatorsProtocols.Add(canvasCreator.Protocol, canvasCreator);
             }
         }
+
+        foreach(ICodeFormatter codeFormatter in extension.GetCodeFormatter()){
+            _codeFormatters.Add(codeFormatter);
+        }
+    }
+
+    public ICodeFormatter GetCodeFormatter(string languageId){
+        ICodeFormatter? formatter = _codeFormatters.FirstOrDefault(x => x.Supports(languageId));
+        return formatter ?? new DefaultCodeFormatter();
     }
 
 

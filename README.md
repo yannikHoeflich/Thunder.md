@@ -3,11 +3,8 @@
 ## Features
 
 ## Planed Features
-- different unordered list icons
-- Line Breaks '\' at end of line
-- Blockquotes
-- Insert texts in lists
-- links
+- Insert texts in lists between lines
+- links (http, https)
 - comments that are ignored in building
 - citation
   - templating
@@ -16,6 +13,7 @@
     - add others (et al, etc.)
     - full names
   - add: dio, isbn, date, url
+- different unordered list icons
 - Complete Extension support
 - complete config file
 - templates

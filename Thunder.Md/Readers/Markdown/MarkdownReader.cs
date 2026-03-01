@@ -83,6 +83,15 @@ public partial class MarkdownReader{
                 RecallOrError();
             }
 
+            if(c == '`'){
+                if(TryReadCodeBlock(out CodeContainer? codeContainer)){
+                    yield return codeContainer;
+                    continue;
+                }
+                
+                RecallOrError();
+            }
+
             if(!TryReadText([new EndChar('\n', 2)], EndLineManagement.ToSpace, true, c, out TextWrapper? paragraph, out _)){
                 RecallOrError();
                 _logger.LogError(_fileReader, "Can not read paragraph");

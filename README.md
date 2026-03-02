@@ -3,8 +3,6 @@
 ## Features
 
 ## Planed Features
-- Insert texts in lists between lines
-- links (http, https)
 - comments that are ignored in building
 - citation
   - templating
@@ -13,14 +11,13 @@
     - add others (et al, etc.)
     - full names
   - add: dio, isbn, date, url
-- different unordered list icons
 - Complete Extension support
 - complete config file
 - templates
-- code blocks
-- inline code
 - graphs (from csv file)
 - global config
+- Insert texts in lists between lines
+- different unordered list icons
 - default image paths (no need to add path to image tag)
 - better logging
 - custom `.page` files to create more custom pages (e.g. Cover)

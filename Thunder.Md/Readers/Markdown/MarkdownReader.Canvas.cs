@@ -50,7 +50,6 @@ public partial class MarkdownReader{
             return false;
         }
 
-        bool isDirect = false;
         if(!_fileReader.TryGetNext(out c)){
             altTextElement = null;
             path = null;
@@ -59,7 +58,7 @@ public partial class MarkdownReader{
         }
 
         altTextElement = null;
-        isDirect = c == '[';
+        bool isDirect = c == '[';
         if(!isDirect){
             if(!TryReadText([new EndChar(']', 1)], EndLineManagement.Error, true, c,
                             out TextWrapper? innerTextWrapper, out _)){
@@ -100,7 +99,7 @@ public partial class MarkdownReader{
             IEnumerable<string[]> splittedParameterStrings = parameterStrings.Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => x.Split('='));
             foreach(string[] parameterParts in splittedParameterStrings){
                 if(parameterParts.Length > 2){
-                    _logger.LogWarning(_fileReader, "The parameter containes more that one '=' symbol. That is invalid syntax and only the first two parts will be used");
+                    _logger.LogWarning(_fileReader, "The parameter contains more that one '=' symbol. That is invalid syntax and only the first two parts will be used");
                 }
                 parameters.Add(parameterParts[0], parameterParts.Length > 1 ? parameterParts[1] : null);
             }

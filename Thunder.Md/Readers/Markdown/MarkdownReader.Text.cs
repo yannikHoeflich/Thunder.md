@@ -332,11 +332,6 @@ public partial class MarkdownReader{
                 text.Clear();
                 
                 _fileReader.Save();
-                if(!_fileReader.TryGetNext(out char tempC) || tempC != '['){
-                    RecallOrErrorPop();
-                    text.Append(c);
-                    continue;
-                }
 
                 if(!TryReadInlineCanvas(out IInlineCanvasElement? inlineCanvasElement)){
                     RecallOrErrorPop();
@@ -345,6 +340,23 @@ public partial class MarkdownReader{
                 }
                 
                 result.Add(inlineCanvasElement);
+                continue;
+            }
+
+            if(c == '['){
+                PureTextElement textElement = new(text.ToString());
+                result.Add(textElement);
+                text.Clear();
+                
+                _fileReader.Save();
+
+                if(!TryReadLink(out WebLink? link)){
+                    RecallOrErrorPop();
+                    text.Append(c);
+                    continue;
+                }
+                
+                result.Add(link);
                 continue;
             }
 

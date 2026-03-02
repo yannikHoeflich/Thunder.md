@@ -22,7 +22,7 @@ public class CodeContainer: IPdfElement{
     public void Prebuild(ThunderConfig config, IThunderBuildState state){
         ICodeFormatter codeFormatter = Program.ExtensionLoader is not null ? Program.ExtensionLoader.GetCodeFormatter(_languageId) : new DefaultCodeFormatter();
 
-        _contentElements = [..codeFormatter.Format(_content)];
+        _contentElements = [..codeFormatter.Format(_content, config)];
         foreach(ITextElement contentElement in _contentElements){
             contentElement.Prebuild(config, state);
         }
